@@ -48,7 +48,6 @@ export default class HomeList extends Component {
         return items;
     }
     getResult = async (items) => {
-        var result = [];
         var finalArray = {};
 
         for (const item of items) {
@@ -63,17 +62,16 @@ export default class HomeList extends Component {
                         username: child.val().username,
                         email: child.val().email,
                         name: child.val().name,
-                        domain: item
                     };
                     result.push({ [id]: data });
                     
                 });
             });
-            finalArray[item] = '';
+            finalArray[item] = result;
 
         }
-        //ToastAndroid.show(JSON.stringify(result), ToastAndroid.SHORT);
-        return result;
+        //ToastAndroid.show(JSON.stringify(finalArray), ToastAndroid.LONG);
+        return finalArray;
     }
     //        //await ToastAndroid.show(JSON.stringify(result), ToastAndroid.SHORT);
     
@@ -83,26 +81,30 @@ export default class HomeList extends Component {
 
         //const num = this.state.dataSource.length;
         return (
-            <View
-                style={{ flex: 1, flexDirection: 'column' }}>
-                <View>
-                    <FlatList 
-                        data={this.state.dataSource}
+            <View>
+                {Object.entries(this.state.dataSource).map(([key, value]) => {
+                    // missing of return was causing FLat List not to render
+                  return <View>
+                      <Text>{key}</Text>
+                      <FlatList 
+                        data={value}
+                        horizontal={true}
                         renderItem={({item}) => 
+                        
+                        
                         <View>
+                            
                             <Text>{item[Object.keys(item)].email}</Text>
                             <Text>{item[Object.keys(item)].username}</Text>
                             <Text>{item[Object.keys(item)].name}</Text>
-                            <Text>{item[Object.keys(item)].domain}</Text>
                         </View>
                         }
                         keyExtractor={item => Object.keys(item).toString()}>
 
                         </FlatList>
 
-
-                </View>
-
+                  </View>  
+                })}
             </View>
         )
     }

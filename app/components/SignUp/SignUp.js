@@ -30,7 +30,7 @@ export default class SignUp extends Component {
                     //database.ref('users').set(obj);
                     //database.ref('user').child(userid).set('fsdajflask');
                   //database.ref('fan').child(userid).set({name: obj.name, username:obj.username, email:obj.email, domain: obj.domain});
-                  database.ref(obj.domain).child(userid).set({name: obj.name, username:obj.username, email:obj.email, domain:obj.domain});
+                  database.ref(obj.domain).child(userid).set({name: obj.name, username:obj.username, email:obj.email});
                   
                   
                     //database.ref('star').child(userid).set(user);
