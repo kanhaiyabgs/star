@@ -17,6 +17,8 @@ import Login from './app/components/Login/Login';
 import Home from './app/components/Home/Home';
 import { app } from 'firebase';
 import HomeList from './app/components/HomeList/HomeList';
+import ListDetails from './app/components/ListDetails/ListDetails';
+import IntroVideo from './app/components//IntroVideo/IntroVideo';
 
 const AppNavigator = createStackNavigator(
   {
@@ -25,11 +27,13 @@ const AppNavigator = createStackNavigator(
     SignUp,
     Login,
     Home,
-    HomeList
+    HomeList,
+    ListDetails,
+    IntroVideo
     
   },
   {
-    initialRouteName:'HomeList',
+    initialRouteName:'IntroVideo',
   }
 );
 
