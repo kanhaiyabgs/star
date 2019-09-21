@@ -1,5 +1,8 @@
 import Firebase from 'firebase';
 
+// this thing was really causing the issue. Without this statement firebase.function was giving undefined error
+import 'firebase/functions';
+
 // Your web app's Firebase configuration
 var firebaseConfig = {
     apiKey: "AIzaSyBSIebl070TG5yUJ2T1pWSf7lZUqkaoBcc",
@@ -16,5 +19,6 @@ let app =  Firebase.initializeApp(firebaseConfig);
 const database = app.database();
 const auth = app.auth();
 const storage = app.storage();
+const functions = app.functions();
 
-export {app, database, auth, storage};
+export {app, database, auth, storage, functions};
