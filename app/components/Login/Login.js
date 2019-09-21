@@ -9,7 +9,7 @@ export default class Login extends Component{
         
         // To do firebase stuff
         const {email, password} = this.state;
-        auth.signInWithEmailAndPassword(email, password).then(() => this.props.navigation.navigate('Home')).catch(error => this.setState({errorMessage: error.message}));
+        auth.signInWithEmailAndPassword(email, password).then(() => this.props.navigation.navigate('HomeScreen')).catch(error => this.setState({errorMessage: error.message}));
     };
 
     render(){
@@ -30,7 +30,7 @@ export default class Login extends Component{
 
                 <Button title="Login" onPress={this.handleLogin}></Button>
                 <Button title="Don't have an account? Sign Up"
-                  onPress={() => this.props.navigation.navigate('SignUp')}>
+                  onPress={() => this.props.navigation.navigate('FanSignUp')}>
                 </Button>
             </View>
 
