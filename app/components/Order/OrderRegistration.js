@@ -6,7 +6,7 @@ export default class StarSignUp extends Component {
 
     constructor(props) {
         super(props);
-        this.state = { language: 'india', email: '', password: '', errorMessage: null, name: '', username: '', bio: '', cost: '', domain: '', subdomain: '' };
+        this.state = { myself:'someoneelse', language: 'india',fan_for: '', email: '', password: '', errorMessage: null, name: '', username: '', bio: '', cost: '', domain: '', subdomain: '' };
     }
 
     s4 = () => {
@@ -41,16 +41,23 @@ export default class StarSignUp extends Component {
 
         // some optimization in database storing can be done so that less data needs to be read 
         // don't forget to set region of function calling. You were stuck here 
-        var payment_request_instamojo =app.functions('asia-east2').httpsCallable('payment_request_instamojo_v10');
-        await payment_request_instamojo({
+        var payment_request_instamojo_market_place = app.functions('asia-east2').httpsCallable('payment_request_instamojo_market_place_v2');
+        await payment_request_instamojo_market_place({
+            uuid: starId,
             amount: amount,
-            purpose: 'Booking celebrity',
+            purpose: bookingId,  // booking id is further used by payment webhook so sending this
             buyer_name: that.state.fan_by
         }).then((result) => {
             var data = result.data;
             if (data['status'] == 'success') {
                 database.ref('reservation').child('booking_fan').child(fanId).child(bookingId).child('status').set(0);
                 database.ref('reservation').child('booking_fan').child(fanId).child(bookingId).child('info').set({ starId: starId, for: that.state.fan_for, from: that.state.fan_by, message: that.state.message, amount: amount, videoUrl: '' });
+
+                // creating data in database for payment info
+                database.ref('instamojo_payment').child(bookingId).child('info').set({ starId: starId, fanId: fanId });
+                database.ref('instamojo_payment').child(bookingId).child('status').set(0);
+                database.ref('instamojo_payment').child(bookingId).child('videoUrl').set('');
+                database.ref('instamojo_payment').child(bookingId).child('amount').set(amount);
 
 
                 // this videoUrl child may cause error . please go through this again 
@@ -60,7 +67,7 @@ export default class StarSignUp extends Component {
 
 
                 database.ref('reservation').child('booking_fan').child(fanId).child(bookingId).child('payment').child('payment_request_id').set(data['payment_request_id']);
-                ToastAndroid.show(data['url'], ToastAndroid.LONG);
+                //ToastAndroid.show(data['url'], ToastAndroid.LONG);
                 that.props.navigation.navigate('PaymentPage', { payment_request_id: data['payment_request_id'], url: data['url'] });
 
             }
@@ -81,17 +88,38 @@ export default class StarSignUp extends Component {
         return (
             <View style={{ marginLeft: 10, marginRight: 10 }}>
                 <Text style={{ textAlign: 'center', fontWeight: "bold", height: 40, width: '90%', marginTop: 8, marginBottom: 12, fontSize: 28, color: '#00BCD4' }}>Order</Text>
+                <Text style={{ fontWeight: "bold", height: 20, width: '90%', marginTop: 15, marginBottom: 12, fontSize: 12, color: '#00BCD4' }}>This Video is for </Text>
+
+
+                <Picker
+                        style={{ height: 50, width: 200 }}
+                        selectedValue={this.state.myself}
+                        onValueChange={(itemValue, itemIndex) => this.setState({ myself: itemValue })}
+                    >
+
+                        <Picker.Item label="SomeoneElse" value="someoneelse" />
+                        <Picker.Item label="Myself" value="myself" />
+                    </Picker>
                 <KeyboardAvoidingView style={{ marginLeft: 10, marginRight: 10 }}>
-                    <Text style={{ fontWeight: "bold" }}>For</Text>
-                    <TextInput placeholder="For" autoCapitalize="none" style={styles.textInput} onChangeText={fan_for => this.setState({ fan_for })} value={this.state.fan_for}
-                        onSubmitEditing={() => this.fan_by_input.focus()}>
-                    </TextInput>
-                    <Text style={{ fontWeight: "bold" }}>From</Text>
+                {(this.state.myself == 'someoneelse') ? (
+                    <View>
+                        <Text style={{ fontWeight: "bold" }}>Their name is </Text>
+                        <TextInput placeholder="For" autoCapitalize="none" style={styles.textInput} onChangeText={fan_for => this.setState({ fan_for })} value={this.state.fan_for}
+                            onSubmitEditing={() => this.fan_by_input.focus()}>
+                        </TextInput>
+                        </View>
+
+                    ) : (
+                        <Text></Text>
+                    )}
+                    
+                    
+                    <Text style={{ fontWeight: "bold" }}>My name is </Text>
                     <TextInput placeholder="From" autoCapitalize="none" style={styles.textInput} onChangeText={fan_by => this.setState({ fan_by })} value={this.state.fan_by}
                         ref={(input) => this.fan_by_input = input} onSubmitEditing={() => this.message_input.focus()}>
                     </TextInput>
                     <Text style={{ fontWeight: "bold" }}>Message</Text>
-                    <TextInput placeholder="Message goes here" autoCapitalize="none"
+                    <TextInput placeholder="Message goes here" autoCapitalize="none" multiline={true}
                         style={styles.textInput} onChangeText={message => this.setState({ message })} value={this.state.message}
                         ref={(input) => this.message_input = input}></TextInput>
                 </KeyboardAvoidingView>

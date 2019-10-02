@@ -33,7 +33,10 @@ export default class BookingHistory extends React.Component {
             translateXTabTwo: new Animated.Value(width),
             translateXTabThree: new Animated.Value(2 * width),
             translateXTabFour: new Animated.Value(3 * width),
-            translateY: -1000,
+            // setting y translation to the height of flat list
+            translateAccepted:0,
+            translateCompleted:0,
+            translatePending:0,
             //all the flat list data begins here
             dataPending: [],
             dataAccepted: [],
@@ -66,7 +69,6 @@ export default class BookingHistory extends React.Component {
             translateXTabTwo,
             translateXTabThree,
             translateXTabFour,
-            translateY
         } = this.state;
         Animated.spring(translateX, {
             toValue: type,
@@ -298,12 +300,7 @@ export default class BookingHistory extends React.Component {
         } = this.state;
 
         return (
-            <View style={{ flex: 1 }}>
-                <View
-                    style={{
-                        width: "100%",
-                    }}
-                >
+            <View style={{ flex: 1, width: "100%" }}>
                     <View
                         style={{
                             flexDirection: "row",
@@ -446,8 +443,6 @@ export default class BookingHistory extends React.Component {
                             </Text>
                         </TouchableOpacity>
                     </View>
-
-                    <ScrollView>
                         <Animated.View
                             style={{
                                 justifyContent: "center",
@@ -460,7 +455,7 @@ export default class BookingHistory extends React.Component {
                             }}
                             onLayout={event =>
                                 this.setState({
-                                    translateY: event.nativeEvent.layout.height
+                                    translatePending: event.nativeEvent.layout.height
                                 })
                             }
                         >
@@ -480,10 +475,15 @@ export default class BookingHistory extends React.Component {
                                         translateX: translateXTabTwo
                                     },
                                     {
-                                        translateY: -translateY
+                                        translateY: -this.state.translatePending
                                     }
                                 ]
                             }}
+                            onLayout={event =>
+                                this.setState({
+                                    translateAccepted: event.nativeEvent.layout.height
+                                })
+                            }
                         >
                             <FlatList
                                 data={this.state.dataAccepted}
@@ -499,8 +499,16 @@ export default class BookingHistory extends React.Component {
                                     {
                                         translateX: translateXTabThree
                                     },
+                                    {
+                                        translateY: -(this.state.translatePending + this.state.translateAccepted)
+                                    }
                                 ]
                             }}
+                            onLayout={event =>
+                                this.setState({
+                                    translateCompleted: event.nativeEvent.layout.height
+                                })
+                            }
                         >
                             <FlatList
                                 data={this.state.dataCompleted}
@@ -517,7 +525,7 @@ export default class BookingHistory extends React.Component {
                                         translateX: translateXTabFour
                                     },
                                     {
-                                        translateY: -3 * translateY
+                                        translateY: -(this.state.translateAccepted+ this.state.translatePending+ this.state.translateCompleted)
                                     }
                                 ]
                             }}
@@ -528,8 +536,7 @@ export default class BookingHistory extends React.Component {
                                 renderItem={item => this._renderItem(item)}
                             ></FlatList>
                         </Animated.View>
-                    </ScrollView>
-                </View>
+                    
             </View>
         );
     }

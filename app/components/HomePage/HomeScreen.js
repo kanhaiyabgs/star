@@ -1,45 +1,34 @@
 import React, { Component } from 'react';
 
-import { AppRegistry, BackHandler, TouchableOpacity, TouchableHighlight, ScrollView, ToastAndroid, FlatList, AsyncStorage, StyleSheet, Text, View, Image, Alert, Button } from 'react-native';
+import { AppRegistry, BackHandler, KeyboardAvoidingView, TouchableOpacity, TextInput, TouchableHighlight, ScrollView, ToastAndroid, FlatList, AsyncStorage, StyleSheet, Text, View, Image, Alert, Button } from 'react-native';
 import { database, storage, auth, app } from '../../src/config'
 export default class HomeScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            dataSource: {},
-            items: [],
-            dataHash: {},
-            loading: true,
-            image: true,
-            data: {},
-            images: {},
             language: 'hindi',
-            domain: ['actors', 'athletes', 'musicians', 'tv', 'youtubers', 'comedians', 'tiktok', 'media', 'models', 'authors', 'politics', 'foreign friends', 'voice artists'],
-            domain_india: ['athletes', 'models', 'foreign friend'],
+            domain_first: ['actors', 'atheletes', 'musicians', 'tv star'],
+            first_done: false,
+            first_set_data: {},
+            domain_second: ['youtubers', 'comedians', 'tiktok'],
+            second_done: false,
+            second_set_data: {},
+            domain_third: ['media', 'models', 'politics', 'foreign friend'],
+            third_done: false,
+            third_set_data: {},
+            count: 0
         }
     }
 
 
     componentDidMount() {
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
-        this.getResult().then(() => {
-            //ToastAndroid.show(JSON.stringify(this.state.data), ToastAndroid.LONG);
-            this.getActualData().then((finalArray) => {
-                // setting state in async function really causing problem
-                this.setState({ loading: false })
-                this.setState({ dataSource: finalArray });
-                //ToastAndroid.show(JSON.stringify(this.state.dataSource), ToastAndroid.LONG);
 
-            });
+        this.getFirstSetData(0).then((data) => {
+            this.setState({ first_set_data: data, first_done: false, count: 1 });
 
-            //ToastAndroid.show(JSON.stringify(this.getActualData()), ToastAndroid.LONG);
-            //ToastAndroid.show(JSON.stringify(this.state.data), ToastAndroid.LONG);
 
-            //ToastAndroid.show(JSON.stringify(this.state.data), ToastAndroid.SHORT);
         });
-        //this.getImages();
-
-
     }
     componentWillUnmount() {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
@@ -56,164 +45,89 @@ export default class HomeScreen extends Component {
             }, {
                 text: 'OK',
                 onPress: () => BackHandler.exitApp()
-            }, ], {
-                cancelable: false
-            }
-         )
-         return true;
-       } 
-
-
-
-    getActualData = async () => {
-        var that = this;
-        var promises = [];
-        var finalArray = {};
-        Object.entries(this.state.data).map(([key, value]) => {
-            //ToastAndroid.show(JSON.stringify(key), ToastAndroid.SHORT);
-            //ToastAndroid.show(JSON.stringify(value), ToastAndroid.SHORT);
-            //var result =[];
-            finalArray[key] = [];
-            for (const id of value) {
-
-
-
-                let promise = database.ref('star').child(id).child('public').once('value', snap => {
-                    var data2 = {};
-
-
-                    data2['name'] = snap.val().name;
-                    data2['domain'] = snap.val().domain;
-                    data2['subDomain'] = snap.val().subDomain;
-                    data2['id'] = id;
-                    var avtar = snap.val().avtar;
-                    data2['url'] = avtar['url'];
-                    //ToastAndroid.show(JSON.stringify(data2), ToastAndroid.SHORT);
-                    //result.push(data2);
-                    finalArray[key].push(data2);
-                    const newObj = Object.assign({}, that.state.dataSource);
-                    newObj[key].push(data2);
-                    that.setState({ dataSource: newObj });
-                    //ToastAndroid.show(JSON.stringify(that.state.dataSource), ToastAndroid.LONG);
-
-                    //that.setState({dataSource:finalArray});
-                    //that.setState({loading:true})
-                });
-                promises.push(promise);
-
-            }
-
-            //finalArray[key] = result;
-        });
-        await Promise.all(promises);
-
-        //ToastAndroid.show(JSON.stringify(this.state.dataSource), ToastAndroid.LONG);
-        return this.state.dataSource;
-
-
-        //return finalArray;               
+            },], {
+            cancelable: false
+        }
+        )
+        return true;
     }
 
-    getResult = async () => {
-        //ToastAndroid.show(JSON.stringify(this.state.data), ToastAndroid.LONG);
-        var finalArray = {};
-        var that = this;
-
-        //var language = AsyncStorage.getItem('language');
-        //this.setState({language: 'hindi'});
-        ToastAndroid.show(JSON.stringify(this.state.language), ToastAndroid.LONG);
 
 
-        for (const item of this.state.domain) {
-            var result = [];
-            finalArray[item] = []
-            //ToastAndroid.show(JSON.stringify(item), ToastAndroid.LONG);
-            await database.ref('cluster/' + this.state.language + '/' + item + '/featured').limitToFirst(10).once('value', snap => {
-                snap.forEach((child) => {
-                    //ToastAndroid.show(JSON.stringify(child.key), ToastAndroid.LONG);
-                    if (child.key != 'count') {
-                        //val.push(child.val());
-                        var id = child.key;
-                        result.push(id);
-                    }
-                    //result.push({id:that.getStar(id)});
-                });
-            });
-            //that.setState(dataHash[item]:result)
-            // working
-            //ToastAndroid.show(JSON.stringify(result), ToastAndroid.LONG);
-            const newObj = Object.assign({}, that.state.data);
-            newObj[item] = result;
-            that.setState({ data: newObj });
-            /*that.setState(prevState => {
-                let hello = Object.assign({}, prevState.data[item]);
-                data[item] = result;
-                return {data};
-            });
-            */
-            //ToastAndroid.show(JSON.stringify(that.state.data), ToastAndroid.LONG);
+    getFirstSetData = async (set) => {
+        var domain;
+        if (set == 0) {
+            domain = this.state.domain_first;
+            this.setState({ first_done: true });
         }
-        //ToastAndroid.show(JSON.stringify(that.state.data), ToastAndroid.LONG);
-
-
-
-        // language independent query  
-        for (const item of this.state.domain_india) {
-            var result = [];
-            finalArray[item] = []
-            await database.ref('cluster/india/' + item + '/featured').limitToFirst(10).once('value', snap => {
-                snap.forEach((child) => {
-                    if (child.key != 'count') {
-                        //val.push(child.val());
-                        var id = child.key;
-                        result.push(id);
-                    }
-                    //result.push({id:that.getStar(id)});
-                });
-            });
-            //that.setState(dataHash[item]:result)
-            // working
-            const newObj = Object.assign({}, that.state.data);
-            newObj[item] = result;
-            that.setState({ data: newObj });
-            /*that.setState(prevState => {
-                let hello = Object.assign({}, prevState.data[item]);
-                data[item] = result;
-                return {data};
-            });
-            */
-            //ToastAndroid.show(JSON.stringify(that.state.data), ToastAndroid.LONG);
+        else if (set == 1) {
+            domain = this.state.domain_second;
+            this.setState({ second_done: true });
         }
-
-        // this is reaslly important . You missed this last time don't miss it again
-        this.setState({ dataSource: finalArray });
-
-        //ToastAndroid.show(JSON.stringify(that.state.data), ToastAndroid.LONG);
-    }
-
-    getStar = async (id) => {
+        else if (set == 2) {
+            domain = this.state.domain_third;
+            this.setState({ third_done: true });
+        }
         var data = {};
-
-        await database.ref('star').child(id).child('public').once('value', snap => {
-            //ToastAndroid.show(JSON.stringify(snap), ToastAndroid.SHORT);
-            data['name'] = snap.val().name;
-            data['domain'] = snap.val().domain;
-            data['subDomain'] = snap.val().subDomain;
-        });
-        //ToastAndroid.show(JSON.stringify(data), ToastAndroid.LONG);
-
+        for (const item of domain) {
+            var data_array = [];
+            var language = this.state.language;
+            if (item == 'atheletes' || item == 'foreign friend' || item == 'models') {
+                language = 'core';
+            }
+            //ToastAndroid.show(JSON.stringify(item), ToastAndroid.LONG);
+            await database.ref('cluster/' + language + '/' + item).limitToFirst(10).once('value', snap => {
+                snap.forEach((child) => {
+                    var data_actual = child.val();
+                    data_actual['id'] = child.key; 
+                    data_array.push(data_actual);
+                });
+            });
+            data[item] = data_array;
+        }
+//        ToastAndroid.show(JSON.stringify(data), ToastAndroid.LONG);
         return data;
+
     }
+
     detailsList = (key) => {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
-        this.props.navigation.navigate('SubDomainList', { key });
+        //ToastAndroid.show(key, ToastAndroid.LONG);
+        this.props.navigation.navigate('DomainScreen', { key });
     }
     starProfile = (id) => {
         BackHandler.removeEventListener('hardwareBackPress', this.handleBackButton);
         this.props.navigation.navigate('StarProfilePage', { id });
 
     }
+
+    capitalize_Words = (str) => {
+        return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+    }
     //        //await ToastAndroid.show(JSON.stringify(result), ToastAndroid.SHORT);
+
+    isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
+        //ToastAndroid.show( '' + layoutMeasurement.height +  ' -- ' + contentOffset.y + ' -- ' +
+          //  contentSize.height + ' -- ' +  paddingToBottom, ToastAndroid.LONG);
+        const paddingToBottom = 5;
+        return layoutMeasurement.height + contentOffset.y >=
+            contentSize.height - paddingToBottom;
+    };
+
+    getMoreData = () => {
+        var count = this.state.count;
+        if (count == 1) {
+            this.getFirstSetData(1).then((data) => {
+                this.setState({ second_set_data: data, second_done: false, count: 2 });
+            });
+        }
+        else if (count == 2) {
+            this.getFirstSetData(2).then((data) => {
+                this.setState({ third_set_data: data, third_done: false, count: 3 });
+            });
+
+        }
+    }
 
 
     render() {
@@ -223,19 +137,40 @@ export default class HomeScreen extends Component {
         //const num = this.state.dataSource.length;
         return (
             <View style={{ flex: 1 }}>
-                
-                <ScrollView style={{ flex: 1 }} scrollEnabled={true} removeClippedSubviews={false}>
-                    {Object.entries(this.state.dataSource).map(([key, value]) => {
+                <KeyboardAvoidingView style={{ marginLeft: 10, marginRight: 10 }} onPress={() => this.props.navigation.navigate('SearchScreen')} >
+                    <Text style={{ fontWeight: "bold" }}>Search Bar</Text>
+                    <TextInput placeholder="Search " autoCapitalize="none" style={{
+                        height: 40,
+                        width: '90%',
+                        borderColor: '#00BCD4',
+                        borderWidth: 1,
+                        borderRadius: 10,
+                        marginTop: 8,
+                        marginBottom: 12
+                    }} onFocus={() => this.props.navigation.navigate('SearchScreen')} >
+                    </TextInput>
+
+                </KeyboardAvoidingView>
+
+
+                <ScrollView scrollEnabled={true} removeClippedSubviews={true}
+                    onScroll={({ nativeEvent }) => {
+                        if (this.isCloseToBottom(nativeEvent)) {
+                            this.getMoreData();
+                        }
+                    }}
+                    scrollEventThrottle={16}>
+                    {Object.entries(this.state.first_set_data).map(([key, value]) => {
                         // missing of return was causing FLat List not to render
                         return <View style={{ marginBottom: 10, marginTop: 10 }}>
 
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <Text>{key}</Text>
-                                <Text onPress={() => { this.detailsList(key) }}>View All</Text>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} >{this.capitalize_Words(key)}</Text>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} onPress={() => { this.detailsList(key) }}>View All</Text>
                             </View>
 
                             <FlatList
-                                refreshing={this.state.loading}
+                                refreshing={this.state.first_done}
                                 data={value}
 
                                 horizontal={true}
@@ -243,22 +178,111 @@ export default class HomeScreen extends Component {
 
                                 renderItem={({ item, index }) => (
                                     <TouchableHighlight
-                                    onPress={() => {this.starProfile(item['id']) }}>
-                                        <View style={{ flexDirection: 'row', backgroundColor: 'white' }}>
-                                            <Image source={{ uri: item['url'] }} style={{ width: 100, height: 100 }}></Image>
-                                            <Text>{item['subDomain']}</Text>
-                                            <Text>{item['name']}</Text>                                        
+                                        onPress={() => { this.starProfile(item['id']) }}>
+                                        <View style={{ marginLeft: 20, marginBottom: 10, marginTop: 10, flexDirection: 'column', backgroundColor: 'white' }}>
+                                            <Image source={{ uri: item['avtar'] }} style={{ overflow: 'visible', borderRadius: 10, width: 110, height: 110 }}></Image>
+                                            <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }}>{this.capitalize_Words(item['name'])}</Text>
+                                            <Text style={{ marginTop: 5, marginBottom: 1 }} >{this.capitalize_Words(item['tag1'])}</Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag2'])} </Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag3'])} </Text>
 
                                         </View>
+
+
+
                                     </TouchableHighlight>
                                 )}
 
-                                keyExtractor={(item, index) => index}>
+                                keyExtractor={(item, index) => item.key}>
 
                             </FlatList>
 
                         </View>
                     })}
+
+                    {Object.entries(this.state.second_set_data).map(([key, value]) => {
+                        // missing of return was causing FLat List not to render
+                        return <View style={{ marginBottom: 10, marginTop: 10 }}>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} >{this.capitalize_Words(key)}</Text>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} onPress={() => { this.detailsList(key) }}>View All</Text>
+                            </View>
+
+                            <FlatList
+                                refreshing={this.state.second_done}
+                                data={value}
+
+                                horizontal={true}
+                                showsHorizontalScrollIndicator={false}
+
+                                renderItem={({ item, index }) => (
+                                    <TouchableHighlight
+                                        onPress={() => { this.starProfile(item['id']) }}>
+                                        <View style={{ marginLeft: 20, marginBottom: 10, marginTop: 10, flexDirection: 'column', backgroundColor: 'white' }}>
+                                            <Image source={{ uri: item['avtar'] }} style={{ overflow: 'visible', borderRadius: 10, width: 110, height: 110 }}></Image>
+                                            <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }}>{this.capitalize_Words(item['name'])}</Text>
+                                            <Text style={{ marginTop: 5, marginBottom: 1 }} >{this.capitalize_Words(item['tag1'])}</Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag2'])} </Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag3'])} </Text>
+
+                                        </View>
+
+
+
+                                    </TouchableHighlight>
+                                )}
+
+                                keyExtractor={(item, index) => item.key}>
+
+                            </FlatList>
+
+                        </View>
+                    })}
+
+
+
+                    {Object.entries(this.state.third_set_data).map(([key, value]) => {
+                        // missing of return was causing FLat List not to render
+                        return <View style={{ marginBottom: 10, marginTop: 10 }}>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} >{this.capitalize_Words(key)}</Text>
+                                <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }} onPress={() => { this.detailsList(key) }}>View All</Text>
+                            </View>
+
+                            <FlatList
+                                refreshing={this.state.third_done}
+                                data={value}
+
+                                horizontal={true}
+                                showsHorizontalScrollIndicator={false}
+
+                                renderItem={({ item, index }) => (
+                                    <TouchableHighlight
+                                        onPress={() => { this.starProfile(item['id']) }}>
+                                        <View style={{ marginLeft: 20, marginBottom: 10, marginTop: 10, flexDirection: 'column', backgroundColor: 'white' }}>
+                                            <Image source={{ uri: item['avtar'] }} style={{ overflow: 'visible', borderRadius: 10, width: 110, height: 110 }}></Image>
+                                            <Text style={{ marginTop: 5, marginBottom: 5, fontWeight: 'bold' }}>{this.capitalize_Words(item['name'])}</Text>
+                                            <Text style={{ marginTop: 5, marginBottom: 1 }} >{this.capitalize_Words(item['tag1'])}</Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag2'])} </Text>
+                                            <Text style={{ marginTop: 1, marginBottom: 1 }} >{this.capitalize_Words(item['tag3'])} </Text>
+
+                                        </View>
+
+
+
+                                    </TouchableHighlight>
+                                )}
+
+                                keyExtractor={(item, index) => item.key}>
+
+                            </FlatList>
+
+                        </View>
+                    })}
+
+
                 </ScrollView>
             </View>
         )

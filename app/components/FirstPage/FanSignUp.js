@@ -31,7 +31,7 @@ export default class FanSignUp extends Component {
                 } else {
                     Alert.alert('User creation failed');
                 }
-                ToastAndroid.show(AsyncStorage.getItem('language'));
+                //ToastAndroid.show(AsyncStorage.getItem('language'));
                 that.props.navigation.navigate('HomeScreen');
             })
         })
@@ -45,8 +45,7 @@ export default class FanSignUp extends Component {
                 action, year, month, day,
             } = await DatePickerAndroid.open({
                 date: new Date(),
-                minDate: new Date(),
-            });
+           });
             if (action !== DatePickerAndroid.dismissedAction) {
                 this.setState({ date: `${day}/${month + 1}/${year}` });
             }
@@ -57,30 +56,30 @@ export default class FanSignUp extends Component {
 
     render() {
         return (
-            <ScrollView style={{ marginLeft: 10, marginRight: 10 }}
-                scrollEnabled={true}>
-                <Text style={{ textAlign:'center', fontWeight: "bold", height: 40,  width: '90%', marginTop: 8, marginBottom:12, fontSize:28, color: '#00BCD4' }}>SignUp</Text>
-                <KeyboardAvoidingView style={{ marginLeft: 10, marginRight: 10 }}>
-                    <Text style={{ fontWeight: "bold" }}>Full Name</Text>
+            <ScrollView style={styles.container}
+                scrollEnabled={true}  showsVerticalScrollIndicator={false}>
+                <Text style={{textAlign: 'center', fontSize:35, marginTop:'5%', color: 'black', fontWeight:'bold'}}>SignUp</Text>
+                <KeyboardAvoidingView style={{ marginTop:'15%',marginLeft: 10, marginRight: 10 }}>
+                    <Text style={{fontWeight: "bold", marginLeft:'15%', color:'black'}}>Full Name</Text>
                     <TextInput placeholder="Full Name" autoCapitalize="none" style={styles.textInput} onChangeText={name => this.setState({ name })} value={this.state.name}
                         onSubmitEditing={() => this.usernameInput.focus()}>
                     </TextInput>
-                    <Text style={{ fontWeight: "bold" }}>Username</Text>
+                    <Text style={{ fontWeight: "bold", marginLeft:'15%', color:'black'}}>Username</Text>
                     <TextInput placeholder="User name" autoCapitalize="none" style={styles.textInput} onChangeText={username => this.setState({ username })} value={this.state.username}
                         ref={(input) => this.usernameInput = input} onSubmitEditing={() => this.emailInput.focus()}>
                     </TextInput>
-                    <Text style={{ fontWeight: "bold" }}>Email</Text>
+                    <Text style={{fontWeight: "bold", marginLeft:'15%', color:'black'}}>Email</Text>
                     <TextInput placeholder="Email goes here" autoCapitalize="none"
                         style={styles.textInput} onChangeText={email => this.setState({ email })} value={this.state.email} 
                         ref={(input) => this.emailInput = input} onSubmitEditing={() => this.passwordInput.focus()}></TextInput>
-                    <Text style={{ fontWeight: "bold" }}>Password</Text>
+                    <Text style={{fontWeight: "bold", marginLeft:'15%', color:'black'}}>Password</Text>
                     <TextInput secureTextEntry placeholder="Password goes here" autoCapitalize="none"
                         style={styles.textInput} onChangeText={password => this.setState({ password })}
                         value={this.state.password}
                         ref={(input) => this.passwordInput = input}>
                     </TextInput>
 
-                    <Text style={{ fontWeight: "bold" , marginTop: 8, marginBottom:4}}>Birthday Date</Text>
+                    <Text style={{fontWeight: "bold", marginLeft:'15%', marginBottom:10, color:'black'}}>Birthday Date</Text>
                     {
                         Platform.OS == 'ios' ? (
                             <DatePickerIOS
@@ -92,7 +91,7 @@ export default class FanSignUp extends Component {
                             (
                                 <TouchableOpacity onPress={() => this.setDateAndroid()}>
                                     <View >
-                                        <Text >
+                                        <Text style={{fontWeight: "bold", marginLeft:'15%', color:'black'}}>
                                             {this.state.date}
                                         </Text>
                                     </View>
@@ -102,7 +101,8 @@ export default class FanSignUp extends Component {
                     }
 
                     <Picker
-                        style={{ height: 50, width: 200 }}
+                        style={{fontWeight: "bold", marginLeft:'15%', marginBottom:10, color:'black'}}
+                        // height: 50, width: 200
                         selectedValue={this.state.language}
                         onValueChange={(itemValue, itemIndex) => this.setState({ language: itemValue })}
                     >
@@ -122,10 +122,10 @@ export default class FanSignUp extends Component {
                 </KeyboardAvoidingView>
 
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={this.handleSignUp}>SignUp </Text>
+                    <Text style={styles.button} onPress={this.handleSignUp}>SignUp </Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={() => this.props.navigation.navigate('Login')}>Already have an account? Login</Text>
+                    <Text style={styles.button} onPress={() => this.props.navigation.navigate('Login')}>Already have an account? Login</Text>
                 </TouchableOpacity>
             </ScrollView>
 
@@ -136,32 +136,45 @@ export default class FanSignUp extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    textStyle:{
-        color:'#fff',
-        textAlign:'center',
+      flex: 1,
+      //justifyContent: 'center',
+      //alignItems: 'center',
+      backgroundColor:'yellow' //'#DCDCDC',
     },
     textInput: {
-        height: 40,
-        width: '90%',
-        borderColor: '#00BCD4',
-        borderWidth: 1,
-        borderRadius:10,
-        marginTop: 8,
-        marginBottom:12
+      marginTop: 10,
+      width: '70%',
+      color:'black',
+
+      paddingTop: 5,
+      paddingBottom: 9,
+      marginBottom: 13,
+      fontSize: 18,
+      marginLeft: '15%',
+      marginRight: '15%',
+      backgroundColor: '#00BCD4',
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: 'black'
     },
-    buttonContainer:{
-        marginTop: 10,
-        paddingTop: 15,
-        paddingBottom: 15,
-        marginLeft: 30,
-        marginRight: 30,
-        backgroundColor: '#00BCD4',
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: '#fff'
+    buttonContainer: {
+      marginTop: 15,
+      width: '70%',
+      paddingTop: 13,
+      paddingBottom: 13,
+      marginBottom: 15,
+      marginLeft: '15%',
+      marginRight: '15%',
+      backgroundColor: '#696969',
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: 'black'
+    },
+    button: {
+      //justifyContent:'center',
+      //alignItems: 'center',
+      textAlign: 'center',
+      color: 'white',
+  
     }
-});
+  });

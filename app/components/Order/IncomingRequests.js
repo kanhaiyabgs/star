@@ -157,6 +157,7 @@ export default class BookingHistory extends React.Component {
         
         database.ref('reservation').child('booking_fan').child(item.fanId).child(item.bookingId).child('status').set(result);
         database.ref('reservation').child('booking_star').child(app.auth().currentUser.uid).child(item.bookingId).child('status').set(result);
+        database.ref('instamojo_payment').child(item.bookingId).child('status').set(result);
         this.setState({dataPendingRefresh: true});
         this.setState({dataPending: [], dataCompleted: []});
         this.getInfo().then(() => {
@@ -215,9 +216,11 @@ export default class BookingHistory extends React.Component {
         database.ref('reservation').child('booking_fan').child(item['fanId']).child(item['bookingId']).child('status').set(2);
         database.ref('reservation').child('booking_fan').child(item['fanId']).child(item['bookingId']).child('info').child('videoUrl').set(videoUrl);
         database.ref('reservation').child('booking_star').child(this.state.userId).child(item['bookingId']).child('status').set(2);
+        database.ref('instamojo_payment').child(item['bookingId']).child('status').set(2);
         database.ref('reservation').child('booking_star').child(this.state.userId).child(item['bookingId']).child('info').child('videoUrl').set(videoUrl);
-
-        database.ref('star').child(this.state.userId).child('public').child('bookedVideo').child(item['for']).set({url : videoUrl});
+        if(item['for'] != ''){
+            database.ref('star').child(this.state.userId).child('public').child('bookedVideo').child(item['for']).set({url : videoUrl});
+        }        
         Alert.alert('Video uploaded!');
 
         // check this uploading stuff ;

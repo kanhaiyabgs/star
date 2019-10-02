@@ -1,24 +1,36 @@
 import React, { Component } from 'react';
 import { ToastAndroid, ScrollView, Alert, TouchableOpacity, StyleSheet, Text, TextInput, View, Button } from 'react-native';
-import { app,functions, auth, database } from '../../src/config';
+import { app, functions, auth, database } from '../../src/config';
 
 export default class FirstPage extends Component {
 
   constructor(props) {
     super(props);
   }
+  logOut = () => {
+    app.auth().signOut().then(function() {
+      ToastAndroid.show('log out succesfull ' , ToastAndroid.SHORT);
+      // Sign-out successful.
+    }, function(error) {
+      ToastAndroid.show('log out nhi hu a  ' , ToastAndroid.SHORT);
+      // An error happened.
+    });
+  }
 
   render() {
     return (
       <View style={styles.container}>
-        <TouchableOpacity style={StyleSheet.buttonContainer}>
-          <Button style={StyleSheet.button} title="Log In" onPress={() => this.props.navigation.navigate('Login')}></Button>
+        <TouchableOpacity style={styles.buttonContainer} onPress={() => this.props.navigation.navigate('Login')}>
+          <Text style={styles.button} >Log In</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={StyleSheet.buttonContainer}>
-          <Button style={StyleSheet.button} title="Sign Up" onPress={() => this.props.navigation.navigate('FanSignUp')}></Button>
+        <TouchableOpacity style={styles.buttonContainer} onPress={() => this.props.navigation.navigate('FanSignUp')}>
+          <Text style={styles.button}  >Sign Up</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={StyleSheet.buttonContainer}>
-          <Button style={StyleSheet.button} title="Enroll as a Star" onPress={() => this.props.navigation.navigate('EnrollTalent')}></Button>
+        <TouchableOpacity style={styles.buttonContainer} onPress={() => this.logOut()}>
+          <Text style={styles.button}  >Log Out</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.buttonContainer} onPress={() => this.props.navigation.navigate('EnrollTalent')}>
+          <Text style={styles.button}  >Enroll as a Star</Text>
         </TouchableOpacity>
       </View>
 
@@ -32,21 +44,26 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     //alignItems: 'center',
-    backgroundColor: '#f5f6fa',
+    backgroundColor:'yellow' //'#DCDCDC',
   },
   buttonContainer: {
-    //width: 100,
-    paddingTop: 20,
-    paddingBottom: 20,
+    marginTop: 15,
+    width: '70%',
+    paddingTop: 13,
+    paddingBottom: 13,
+    marginBottom: 15,
+    marginLeft: '15%',
+    marginRight: '15%',
+    backgroundColor: '#696969',
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: 'black'
   },
   button: {
-    width: 100,
-    paddingTop: 10,
-    paddingBottom: 20,
-    borderColor: 'black',
-    //backgroundColor:'#D3D3D3',
-    borderWidth: 1,
-    borderStyle: 'solid',
-    borderRadius: 25
+    //justifyContent:'center',
+    //alignItems: 'center',
+    textAlign: 'center',
+    color: 'white',
+
   }
 });

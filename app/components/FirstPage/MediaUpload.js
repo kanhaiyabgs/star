@@ -8,8 +8,8 @@ export default class MediaUpload extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            Iloading: false, userid: '', imageId: this.uniqueId(), imageSelected: false, Iuploading: false, Iprogress: 0,
-            Vloading: false, userid: '', videoId: this.uniqueId(), videoSelected: false, Vuploading: false, Vprogress: 0
+            userid: '', imageId: this.uniqueId(), Iuploading: false, Iprogress: 0,
+            userid: '', videoId: this.uniqueId(), Vuploading: false, Vprogress: 0
         };
     }
 
@@ -36,7 +36,6 @@ export default class MediaUpload extends Component {
         }).then((image) => {
             const imagePath = image.path;
             that.setState({
-                imageSelected: true,
                 imageId: this.uniqueId(),
             });
             that.uploadImage(imagePath);
@@ -48,10 +47,10 @@ export default class MediaUpload extends Component {
 
     uploadImage = async (uri) => {
         var that = this;
-        ToastAndroid.show(app.auth().currentUser.uid.toString(), ToastAndroid.SHORT);
+        //ToastAndroid.show(app.auth().currentUser.uid.toString(), ToastAndroid.SHORT);
         var userid = app.auth().currentUser.uid;
 
-        ToastAndroid.show(auth.currentUser.uid.toString(), ToastAndroid.SHORT);
+        //ToastAndroid.show(auth.currentUser.uid.toString(), ToastAndroid.SHORT);
 
         that.setState({ userid: userid });
         var imageId = that.state.imageId;
@@ -60,7 +59,7 @@ export default class MediaUpload extends Component {
         var ext = re.exec(uri)[1];
         this.setState({
             currentFileType: ext,
-            uploading: true
+            Iuploading : true
         });
         var FilePath = imageId + '.' + that.state.currentFileType;
         const response = await fetch(uri);
@@ -68,14 +67,16 @@ export default class MediaUpload extends Component {
         var uploadTask = storage.ref('star/' + userid + '/image').child(FilePath).put(blob);
 
         uploadTask.on('state_changed', (snapshot) => {
-            var progress = ((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toFixed(0);
+            var progress = ((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toString().substring(0,2);
             that.setState({
                 Iprogress: progress,
             });
         }, (error) => Alert.alert('error with upload - ' + error),
             () => {
-                that.setState({ Iprogress: 100 });
+                that.setState({ Iprogress: 100, Iuploading: false });
+
                 uploadTask.snapshot.ref.getDownloadURL().then((downloadUrl) => {
+                    
                     that.processImageUpload(downloadUrl);
                 });
 
@@ -83,7 +84,21 @@ export default class MediaUpload extends Component {
     }
 
     processImageUpload = (imageUrl) => {
+        var that = this;
         database.ref('star').child(this.state.userid).child('public').child('avtar').set({ url: imageUrl });
+        var languages =  that.props.navigation.state.params.language;
+        var domain = that.props.navigation.state.params.domain;
+
+        if (domain == 'atheletes' || domain == 'foreign friend' || domain == 'models') {
+            database.ref('cluster').child('core').child(domain).child(this.state.userid).child('avtar').set(imageUrl);
+        }
+        else {
+            for (var i = 0; i < languages.length; i++) {
+                database.ref('cluster').child(languages[i]).child(domain).child(this.state.userid).child('avtar').set(imageUrl);
+                
+            }
+        }
+        database.ref('search').child(this.state.userid).child('avtar').set(imageUrl);
         Alert.alert('Image uploaded!');
     }
 
@@ -101,12 +116,12 @@ export default class MediaUpload extends Component {
         ImagePicker.openPicker({
             mediaType: "video",
         }).then((video) => {
-            ToastAndroid.show(JSON.stringify(video), ToastAndroid.LONG);
+            //ToastAndroid.show(JSON.stringify(video), ToastAndroid.LONG);
             Blob.build(RNFetchBlob.wrap(video.path), { type: video.mime })
                 .then((blob) => {
 
                     var userid = app.auth().currentUser.uid;
-                    ToastAndroid.show(userid, ToastAndroid.LONG);
+                    //ToastAndroid.show(userid, ToastAndroid.LONG);
                     that.setState({ userid: userid });
                     var videoId = this.uniqueId();
                     var re = /(?:\/)([a-zA-z0-9]+)$/;
@@ -120,17 +135,18 @@ export default class MediaUpload extends Component {
                     var uploadTask = storage.ref('star/' + userid + '/introVideo').child(FilePath).put(blob, { contentType: video.mime });
 
                     uploadTask.on('state_changed', (snapshot) => {
-                        ToastAndroid.show(JSON.stringify(snapshot.bytesTransferred), ToastAndroid.SHORT);
-                        ToastAndroid.show(JSON.stringify(snapshot.totalBytes), ToastAndroid.SHORT);
+                        //ToastAndroid.show(JSON.stringify(snapshot.bytesTransferred), ToastAndroid.SHORT);
+                        
 
-                        var progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        var progress = ((snapshot.bytesTransferred / snapshot.totalBytes) * 100).toString().substring(0,2);
+                        //ToastAndroid.show(JSON.stringify(progress), ToastAndroid.SHORT);//
                         that.setState({
                             Vprogress: progress,
                         });
                     }, (error) => Alert.alert('error with upload - ' + error),
                         () => {
 
-                            that.setState({ Vprogress: 100 });
+                            that.setState({ Vprogress: 100, Vuploading: false });
                             uploadTask.snapshot.ref.getDownloadURL().then((downloadUrl) => {
                                 that.processVideoUpload(downloadUrl);
                             });
@@ -144,7 +160,6 @@ export default class MediaUpload extends Component {
 
         database.ref('star').child(this.state.userid).child('public').child('introVideo').set({ url: videoUrl });
         Alert.alert('Video uploaded!');
-        this.setState({ Vdone: true, Vuploading: false });
 
     }
 
@@ -152,17 +167,17 @@ export default class MediaUpload extends Component {
 
         return (
             <  View style={styles.container}>
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={this.uploadPhoto}>Choose photo</Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={this.uploadPhoto}>
+                    <Text style={styles.textStyle} >Choose photo</Text>
                 </TouchableOpacity>
-                <Text style={styles.textStyle} >{this.state.Iprogress}%</Text>
+                {this.state.Iuploading && <Text style={{color:'black'}} >Progress - {this.state.Iprogress}%</Text>}
 
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={this.uploadVideo}>Choose Intro Video</Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={this.uploadVideo}>
+                    <Text style={styles.textStyle} >Choose Intro Video</Text>
                 </TouchableOpacity>
-                <Text style={styles.textStyle}>{this.state.Vprogress}%</Text>
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={() => this.props.navigation.navigate('HomeScreen')}>Done</Text>
+                {this.state.Vuploading &&  <Text style={{color:'black'}}>Progress - {this.state.Vprogress}%</Text>}
+                <TouchableOpacity style={styles.buttonContainer} onPress={() => this.props.navigation.navigate('BankDetails')}>
+                    <Text style={styles.textStyle} >Done</Text>
                 </TouchableOpacity>
 
 

@@ -10,14 +10,16 @@ export default class FanSignUp extends Component {
     }
 
     verifyCode = async () => {
+        // **** This code needs to go to firebase function *****  
         var value = (parseInt(this.state.code) *25 + 99989)-78259 ;
-        ToastAndroid.show(this.state.code, ToastAndroid.LONG);
-        ToastAndroid.show(JSON.stringify(value), ToastAndroid.LONG);
+
+        //ToastAndroid.show(this.state.code, ToastAndroid.LONG);
+        //ToastAndroid.show(JSON.stringify(value), ToastAndroid.LONG);
 
 
 
         var ref = database.ref('authentication');
-        ToastAndroid.show(JSON.stringify(ref.child(value)), ToastAndroid.LONG);
+        //ToastAndroid.show(JSON.stringify(ref.child(value)), ToastAndroid.LONG);
         ref.child(value).once('value', (snapshot) => {
             if(snapshot.val() == null){
                 Alert.alert('Wrong verification code')
@@ -35,8 +37,8 @@ export default class FanSignUp extends Component {
                     <TextInput placeholder="Code goes here" keyboardType="numeric" autoCapitalize="none" style={styles.textInput} onChangeText={code => this.setState({ code })} value={this.state.code}>
                     </TextInput>
 
-                    <TouchableOpacity style={styles.buttonContainer}>
-                        <Text style={styles.textStyle} onPress={this.verifyCode}>Submit </Text>
+                    <TouchableOpacity style={styles.buttonContainer}  onPress={this.verifyCode}>
+                        <Text style={styles.textStyle} >Submit </Text>
                     </TouchableOpacity>
 
             </View>

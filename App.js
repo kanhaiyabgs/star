@@ -26,40 +26,53 @@ import StarSignUp from './app/components/FirstPage/StarSignUp';
 import MediaUpload from './app/components/FirstPage/MediaUpload';
 import HomeScreen from './app/components/HomePage/HomeScreen';
 import SubDomainList from './app/components/HomePage/SubDomainList';
-import SubDomainScreen from './app/components/HomePage/SubDomainScreen';
+import DomainScreen from './app/components/HomePage/DomainScreen';
 import StarProfilePage from './app/components/HomePage/StarProfilePage';
 import BookingHistory from './app/components/Order/BookingHistory';
 import IncomingRequests from './app/components/Order/IncomingRequests';
 import OrderRegistration from './app/components/Order/OrderRegistration';
 import ProfilePage from './app/components/Profile/ProfilePage';
+import BankDetails from './app/components/FirstPage/BankDetails';
+import SearchScreen from './app/components/HomePage/SearchScreen';
 
-
-const HomeStack = createStackNavigator(
+const NoTabStack = createStackNavigator(
   {
     SignUp ,
     Login,
     FirstPage ,
     FanSignUp,
+    BankDetails,
     EnrollTalent,
     OTPverification,
     StarSignUp,
     MediaUpload,
+  },
+  {
+    initialRouteName:'FirstPage'
+  })
+
+
+const HomeStack = createStackNavigator(
+  {
+    
     HomeScreen,
     SubDomainList,
-    SubDomainScreen,
+    DomainScreen,
     StarProfilePage,
     OrderRegistration,
-    PaymentPage
+    PaymentPage,
+    SearchScreen
     
   },
   {
-    initialRouteName:'FirstPage',
+    initialRouteName:'HomeScreen',
   }
 );
 
-/*HomeStack.navigationOptions = ({ navigation }) => {
+/*
+HomeStack.navigationOptions = ({ navigation }) => {
   let tabBarVisible = false;
-  //ToastAndroid.show(JSON.stringify(navigation.state), ToastAndroid.LONG);
+  ToastAndroid.show(JSON.stringify(navigation.state), ToastAndroid.LONG);
   var routeArray = navigation.state.routes;
   for( const route of routeArray){
     if(route.routeName == 'HomeScreen'){
@@ -80,16 +93,15 @@ const HomeStack = createStackNavigator(
     tabBarVisible,
   }
 }
+
+
 */
-
-
-
 const ProfileStack = createStackNavigator(
   {
     ProfilePage,
     BookingHistory,
     IncomingRequests,
-    FirstPage    
+    //FirstPage    
   },
   {
     initialRouteName:'ProfilePage',
@@ -122,15 +134,29 @@ const ProfileStack = createStackNavigator(
 }
 
 */
+const TabBar = createBottomTabNavigator({
+  Home: HomeStack,
+  Profile: ProfileStack
+}
+);
+
+const MainStack = createStackNavigator({
+  NoTabStack,
+  TabBar
+},
+
+// this solved the problem
+
+{
+  headerMode: 'none',
+  navigationOptions: {
+    headerVisible: false,
+  }
+}
+);
+
 const AppContainer = createAppContainer(
-  createBottomTabNavigator(
-    {
-      //Login: LoginStack,
-      Home: HomeStack,
-      Profile: ProfileStack,
-    },
-    
-  )
+  MainStack
 );
 
 export default class App extends Component{

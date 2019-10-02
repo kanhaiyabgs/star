@@ -20,28 +20,35 @@ export default class EnrollTalent extends Component {
             email: this.state.email,
             number: this.state.number
         }
+        try {
+            // https://github.com/axios/axios/issues/2235
+            // can'find varibale btoa in axios version greater tha 0.18.0 so installed 0.18.0
+            axios({
+                method: 'post',
+                url: 'https://api.mailgun.net/v3/sandboxdbf73cd344c5447c972a33bba8be7610.mailgun.org/messages',
+                auth: {
+                    username: 'api',
+                    password: '9aa46dba2dca67af7eea7b79b97629f2-19f318b0-4f808cfd'
+                },
+                params: {
+                    from: this.state.name + '@sandboxdbf73cd344c5447c972a33bba8be7610.mailgun.org',
+                    to: 'kanhaiyabgs002@gmail.com',
+                    subject: 'New registration',
+                    text: JSON.stringify(body)
+                }
+            }, {
+                'Content-type': 'multipart/form-data'
+            }).then(respinse => {
+                Alert.alert('Form Submitted, will get back to you')
+                //            ToastAndroid.show(JSON.stringify(respinse), ToastAndroid.LONG);
+            })
 
-    // https://github.com/axios/axios/issues/2235
-    // can'find varibale btoa in axios version greater tha 0.18.0 so installed 0.18.0
-       axios({
-        method: 'post',
-        url: 'https://api.mailgun.net/v3/sandboxdbf73cd344c5447c972a33bba8be7610.mailgun.org/messages',
-        auth: {
-          username: 'api',
-          password: '9aa46dba2dca67af7eea7b79b97629f2-19f318b0-4f808cfd'
-        },
-        params: {
-          from : this.state.name + '@sandboxdbf73cd344c5447c972a33bba8be7610.mailgun.org',
-          to : 'kanhaiyabgs002@gmail.com',
-          subject : 'New registration',
-          text : JSON.stringify(body)
+
+
+        } catch (error) {
+            ToastAndroid.show('Registration failed ' + error);
+
         }
-      }, {
-          'Content-type': 'multipart/form-data'
-        }).then(respinse => {
-            Alert.alert('Form Submitted, will get back to you')
-//            ToastAndroid.show(JSON.stringify(respinse), ToastAndroid.LONG);
-        })
 
 
     };
@@ -85,12 +92,12 @@ export default class EnrollTalent extends Component {
 
                 </KeyboardAvoidingView>
 
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={this.handleRegistration}>Submit </Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={this.handleRegistration}>
+                    <Text style={styles.textStyle} >Submit </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.buttonContainer}>
-                    <Text style={styles.textStyle} onPress={() => this.props.navigation.navigate('OTPverification')}>Already verified ? Complete Registration </Text>
+                <TouchableOpacity style={styles.buttonContainer} onPress={() => this.props.navigation.navigate('OTPverification')}>
+                    <Text style={styles.textStyle} >Already verified ? Complete Registration </Text>
                 </TouchableOpacity>
             </ScrollView>
 

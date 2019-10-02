@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-import { AppRegistry, TouchableOpacity, ScrollView, ToastAndroid, FlatList, StyleSheet, Text, View, Image, Alert, Button } from 'react-native';
+import { Dimensions, TouchableOpacity, ScrollView, ToastAndroid, FlatList, StyleSheet, Text, View, Image, Alert, Button } from 'react-native';
 import { database, storage, auth, app } from '../../src/config'
 import Video from 'react-native-video';
 export default class StarProfilePage extends Component {
@@ -8,6 +8,7 @@ export default class StarProfilePage extends Component {
         super(props);
         this.state = {
             data: [],
+            muted: true,
             refreshing: false,
             loading: false,
             lastVisible: null,
@@ -118,32 +119,36 @@ export default class StarProfilePage extends Component {
             }
           });
     }
+    capitalize_Words = (str) => {
+        return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+    };
+    changeSound = () => {
+        this.setState({muted: !this.state.muted});
+    }
+
 
     render() {
 
         return (
-
-            <View >
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-between', flexDirection: 'column' }}
-                    style={{ backgroundColor: 'white', paddingBottom: 20 }}>
-                    <View style={{ flex: 1, justifyContent: 'flex-start' }}>
+                    style={{ backgroundColor: 'white', paddingBottom: 20 }} scrollEnabled={true}>
                         <Video
                             source={{ uri: this.state.introVideoUrl }}
-                            resizeMode={'stretch'}
-                            rate={1} volume={1} muted={false}
+                            resizeMode={'cover'}
+                            rate={1} volume={1} muted={this.state.muted}
                             repeat={true}
-                            style={{ position: 'absolute', flex: 1, height: 200, width: '100%', top: 0, left: 0 }}
+                            style={{ position: 'absolute', flex: 1, height: (Dimensions.get('window').height - Dimensions.get('window').height/3), width: '100%', top: 0, left: 0 }}
                         />
-                        <Text>{this.state.name}</Text>
+                        <Text  style={{ fontSize:20, marginTop: (Dimensions.get('window').height - Dimensions.get('window').height/3) + 2, marginBottom: 5, textAlign:'center', fontWeight: 'bold' }} onPress={() => { this.changeSound()}}  >Mute/Unmute</Text>
                         
-                    </View>
+                        
+                    <Text style={{ fontSize:40, marginTop: (Dimensions.get('window').height - Dimensions.get('window').height/3) + 10, marginBottom: 5, textAlign:'center', fontWeight: 'bold' }} >{this.capitalize_Words(this.state.name)}</Text>
+                    <Image source={{ uri: this.state.introVideoUrl}} style={{width: 200, height: 200}}></Image>
                     <View style={{ flex: 1, justifyContent: 'flex-end' }}>
                         <Button title={"Book now for " + this.state.cost}  onPress={() => this.props.navigation.navigate('OrderRegistration', {fanId: app.auth().currentUser.uid, starId:this.state.starId, amount: this.state.cost})}> ></Button>
                     </View>
                 </ScrollView>
-
-            </View>
         )
     }
 }
